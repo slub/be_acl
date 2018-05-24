@@ -24,6 +24,7 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Http\HtmlResponse;
 
 /**
  * This class extends the permissions module in the TYPO3 Backend to provide
@@ -74,10 +75,9 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
      * The main dispatcher function. Collect data and prepare HTML output.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function dispatch(ServerRequestInterface $request, ResponseInterface $response)
+    public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
         // Actions handled by this class
         $handledActions = ['delete_acl'];
@@ -85,26 +85,38 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         // Handle action
         $action = $this->conf['action'];
         if ($this->conf['page'] > 0 && in_array($action, $handledActions)) {
-            return $this->handleAction($request, $response, $action);
+            return $this->handleAction($request, $action);
         } // Action handled by parent
         else {
             return parent::dispatch($request, $response);
         }
     }
 
-    protected function handleAction(ServerRequestInterface $request, ResponseInterface $response, $action)
+    /**
+     * @param ServerRequestInterface $request
+     * @param $action
+     * @return mixed
+     */
+    protected function handleAction(ServerRequestInterface $request, $action)
     {
         $methodName = GeneralUtility::underscoredToLowerCamelCase($action);
         if (method_exists($this, $methodName)) {
-            return call_user_func_array(array($this, $methodName), [$request, $response]);
+            return call_user_func_array(array($this, $methodName), [$request]);
         } else {
             $response->getBody()->write('Action method not found');
             return $response->withStatus(400);
         }
     }
 
-    protected function deleteAcl(ServerRequestInterface $request, ResponseInterface $response)
+    /**
+     * The main dispatcher function. Collect data and prepare HTML output.
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    protected function deleteAcl(ServerRequestInterface $request) : ResponseInterface
     {
+        $response = new HtmlResponse('');
         $GLOBALS['LANG']->includeLLFile('EXT:be_acl/Resources/Private/Languages/locallang_perm.xlf');
         $GLOBALS['LANG']->getLL('aclUsers');
 
@@ -142,6 +154,11 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         return $response;
     }
 
+    /**
+     * @param $table
+     * @param $id
+     * @param DataHandler $tcemainObj
+     */
     protected function checkModifyAccess($table, $id, DataHandler $tcemainObj)
     {
         // Check modify access
@@ -163,6 +180,12 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         }
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @param $reason
+     * @param int $status
+     * @return static
+     */
     protected function errorResponse(ResponseInterface $response, $reason, $status = 500)
     {
         return $response->withStatus($status, $reason);
