@@ -24,10 +24,12 @@ namespace JBartels\BeAcl\View;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Backend\View\BackendTemplateView as BaseBackendTemplateView;
+
 /**
  * @see \TYPO3\CMS\Backend\View\BackendTemplateView
  */
-class BackendTemplateView extends \TYPO3\CMS\Backend\View\BackendTemplateView
+class BackendTemplateView extends BaseBackendTemplateView
 {
 
     /**

@@ -25,6 +25,8 @@ namespace JBartels\BeAcl\Cache;
  ***************************************************************/
 
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Cache\CacheManager;
 
 /**
  * This utility can be used to check the timestamps of the permission
@@ -125,8 +127,8 @@ class TimestampUtility implements SingletonInterface
             return;
         }
 
-        /** @var \TYPO3\CMS\Core\Cache\CacheManager $cacheManager */
-        $cacheManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\Core\\Cache\\CacheManager');
+        /** @var CacheManager $cacheManager */
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         $this->setTimestampCache($cacheManager->getCache('tx_be_acl_timestamp'));
     }
 }

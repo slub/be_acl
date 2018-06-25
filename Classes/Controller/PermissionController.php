@@ -27,13 +27,12 @@ namespace JBartels\BeAcl\Controller;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\Utility\IconUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\ArrayUtility;
-use TYPO3\CMS\Backend\Tree\View\PageTreeView;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
-use JBartels\BeAcl\View\BackendTemplateView;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Beuser\Controller\PermissionController as BaseController;
+use JBartels\BeAcl\View\BackendTemplateView;
 
 /**
  * Backend ACL - Replacement for "web->Access"
@@ -43,7 +42,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
  * Bugfixes applied:
  * #25942, #25835, #13019, #13176, #13175 Jan Bartels
  */
-class PermissionController extends \TYPO3\CMS\Beuser\Controller\PermissionController
+class PermissionController extends BaseController
 {
 
     protected $defaultViewObjectName = BackendTemplateView::class;
@@ -220,7 +219,7 @@ class PermissionController extends \TYPO3\CMS\Beuser\Controller\PermissionContro
     protected function updateAction(array $data, array $mirror)
     {
         // Process data map
-        $tce = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\DataHandling\\DataHandler');
+        $tce = GeneralUtility::makeInstance(DataHandler::class);
         $tce->stripslashes_values = 0;
         $tce->start($data, array());
         $tce->process_datamap();

@@ -16,22 +16,21 @@ namespace JBartels\BeAcl\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Beuser\Controller\PermissionAjaxController as BaseController;
+use JBartels\BeAcl\Exception\RuntimeException;
 
 /**
  * This class extends the permissions module in the TYPO3 Backend to provide
  * convenient methods of editing of page permissions (including page ownership
  * (user and group)) via new AjaxRequestHandler facility
  */
-class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAjaxController
+class PermissionAjaxController extends BaseController
 {
 
     /**
@@ -88,7 +87,7 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
             return $this->handleAction($request, $action);
         } // Action handled by parent
         else {
-            return parent::dispatch($request, $response);
+            return parent::dispatch($request);
         }
     }
 
@@ -102,9 +101,6 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         $methodName = GeneralUtility::underscoredToLowerCamelCase($action);
         if (method_exists($this, $methodName)) {
             return call_user_func_array(array($this, $methodName), [$request]);
-        } else {
-            $response->getBody()->write('Action method not found');
-            return $response->withStatus(400);
         }
     }
 
@@ -165,18 +161,18 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         $modifyAccessList = $tcemainObj->checkModifyAccessList($table);
         // Check basic permissions and circumstances:
         if (!isset($GLOBALS['TCA'][$table]) || $tcemainObj->tableReadOnly($table) || !is_array($tcemainObj->cmdmap[$table]) || !$modifyAccessList) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException($GLOBALS['LANG']->getLL('noPermissionToModifyAcl'));
+            throw new RuntimeException($GLOBALS['LANG']->getLL('noPermissionToModifyAcl'));
         }
 
         // Check table / id
         if (!$GLOBALS['TCA'][$table] || !$id) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
+            throw new RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
         }
 
         // Check edit access
         $hasEditAccess = $tcemainObj->BE_USER->recordEditAccessInternals($table, $id, false, false, true);
         if (!$hasEditAccess) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
+            throw new RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
         }
     }
 

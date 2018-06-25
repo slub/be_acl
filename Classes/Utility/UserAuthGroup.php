@@ -27,6 +27,7 @@ namespace JBartels\BeAcl\Utility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use JBartels\BeAcl\Cache\PermissionCache;
 
 /**
  * Backend ACL - Functions re-calculating permissions
@@ -145,8 +146,8 @@ class UserAuthGroup
     public function getPagePermsClause($params, $that)
     {
 
-        /** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
-        $permissionCache = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCache');
+        /** @var PermissionCache $permissionCache */
+        $permissionCache = GeneralUtility::makeInstance(PermissionCache::class);
         $permissionCache->setBackendUser($that);
 
         $cachedPermissions = $permissionCache->getPermissionsClause($params['perms']);

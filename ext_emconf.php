@@ -14,7 +14,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'title' => 'Backend ACLs',
 	'description' => 'Backend Access Control Lists',
 	'category' => 'be',
-	'version' => '1.7.3',
+	'version' => '1.8.0',
 	'state' => 'stable',
 	'uploadfolder' => 0,
 	'createDirs' => '',
@@ -36,5 +36,3 @@ $EM_CONF[$_EXTKEY] = array(
 		),
 	),
 );
-
-?>

@@ -24,6 +24,10 @@ namespace JBartels\BeAcl\Hook;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use JBartels\BeAcl\Cache\PermissionCache;
+
 /**
  * This class contains hooks that are called by the TYPO3 DataHandler
  * when a record is modified (processDatamap / processCmdmap).
@@ -41,7 +45,7 @@ class DataHandlerHook
      * @param mixed $recordId The record's uid for update records, a string to look the record's uid up after it has
      *     been created.
      * @param array $updatedFields Array of changed fiels and their new values.
-     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $tceMain TCEmain parent object.
+     * @param DataHandler $tceMain TCEmain parent object.
      * @return void
      */
     public function processDatamap_afterDatabaseOperations($status, $table, $recordId, $updatedFields, $tceMain)
@@ -69,7 +73,7 @@ class DataHandlerHook
      * @param string $table The record's table.
      * @param integer $recordId The record's uid.
      * @param array $commandValue The commands value, typically an array with more detailed command information.
-     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $tceMain The TCEmain parent object.
+     * @param DataHandler $tceMain The TCEmain parent object.
      * @return void
      */
     public function processCmdmap_postProcess(
@@ -77,7 +81,7 @@ class DataHandlerHook
         $table,
         $recordId,
         $commandValue,
-        \TYPO3\CMS\Core\DataHandling\DataHandler $tceMain
+        DataHandler $tceMain
     ) {
 
         // This is required to take care of deleted ACLs.
@@ -91,8 +95,8 @@ class DataHandlerHook
      */
     protected function flushPermissionCache()
     {
-        /** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
-        $permissionCache = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCache');
+        /** @var PermissionCache $permissionCache */
+        $permissionCache = GeneralUtility::makeInstance(PermissionCache::class);
         $permissionCache->flushCache();
     }
 
