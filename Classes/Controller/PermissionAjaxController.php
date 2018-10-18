@@ -78,6 +78,25 @@ class PermissionAjaxController extends BaseController
      */
     public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
+        //in sysext ACL moved to dispatch() method
+        $parsedBody = $request->getParsedBody();
+
+        $this->conf = [
+            'page' => $parsedBody['page'] ?? null,
+            'who' => $parsedBody['who'] ?? null,
+            'mode' => $parsedBody['mode'] ?? null,
+            'bits' => (int)($parsedBody['bits'] ?? 0),
+            'permissions' => (int)($parsedBody['permissions'] ?? 0),
+            'action' => $parsedBody['action'] ?? null,
+            'ownerUid' => (int)($parsedBody['ownerUid'] ?? 0),
+            'username' => $parsedBody['username'] ?? null,
+            'groupUid' => (int)($parsedBody['groupUid'] ?? 0),
+            'groupname' => $parsedBody['groupname'] ?? '',
+            'editLockState' => (int)($parsedBody['editLockState'] ?? 0),
+            'new_owner_uid' => (int)($parsedBody['newOwnerUid'] ?? 0),
+            'new_group_uid' => (int)($parsedBody['newGroupUid'] ?? 0),
+        ];
+
         // Actions handled by this class
         $handledActions = ['delete_acl'];
 
