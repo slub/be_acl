@@ -72,6 +72,8 @@ class PermissionCache implements SingletonInterface
 
     /**
      * Initializes the timestamp utility.
+     *
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     public function __construct()
     {
@@ -230,6 +232,7 @@ class PermissionCache implements SingletonInterface
 
     /**
      * Initializes the required cache classes.
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     protected function initializeRequiredClasses()
     {

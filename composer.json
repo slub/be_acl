@@ -9,7 +9,8 @@
 		}
 	},
 	"require": {
-		"typo3/cms-core": "^9.0"
+		"typo3/cms-core": "^9.0",
+		"typo3/cms-beuser": "^9.0"
 	},
 	"replace": {
 		"be_acl": "self.version",

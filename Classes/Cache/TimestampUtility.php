@@ -58,6 +58,7 @@ class TimestampUtility implements SingletonInterface
      *
      * @param int $timestamp
      * @return bool
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     public function permissionTimestampIsValid($timestamp)
     {
@@ -83,6 +84,7 @@ class TimestampUtility implements SingletonInterface
      *
      * @param int $offset
      * @return void
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     public function updateTimestamp($offset = 0)
     {
@@ -119,6 +121,7 @@ class TimestampUtility implements SingletonInterface
      * Initializes the timestamp cache
      *
      * @return void
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     protected function initializeCache()
     {
