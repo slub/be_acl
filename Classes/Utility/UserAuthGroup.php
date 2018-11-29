@@ -98,7 +98,7 @@ class UserAuthGroup
                 $recursive = '';
             }
 
-            $queryBuilder->addSelectLiteral('type,object_id,permissions')
+            $queryBuilder->addSelectLiteral('*')
                 ->from('tx_beacl_acl')
                 ->where('pid=' . intval($values['uid']) . $recursive)
                 ->orderBy('recursive');
@@ -226,7 +226,7 @@ class UserAuthGroup
             ->getConnectionForTable('tx_beacl_acl');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('pid, recursive')
+        $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
             ->where($where . $whereAllow);
         $res = $query->execute()->fetchAll();
@@ -240,7 +240,7 @@ class UserAuthGroup
             // get all "deny" acls if there are allow ACLs
             $query = $connection->createQueryBuilder();
             $query->getRestrictions()->removeAll();
-            $query->addSelectLiteral('pid, recursive')
+            $query->addSelectLiteral('*')
                 ->from('tx_beacl_acl')
                 ->where($where . $whereDeny);
             $res = $query->execute()->fetchAll();
@@ -290,7 +290,7 @@ class UserAuthGroup
             ->getConnectionForTable('pages');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('uid')
+        $query->addSelectLiteral('*')
             ->from('pages')
             ->where('pid=' . intval($pid) . ' AND deleted=0');
         $res = $query->execute()->fetchAll();

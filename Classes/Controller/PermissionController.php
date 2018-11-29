@@ -243,7 +243,7 @@ class PermissionController extends BaseController
             ->getConnectionForTable('tx_beacl_acl');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('uid, pid, object_id, type, recursive')
+        $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
             ->where("tx_beacl_acl.type=$type");
 
@@ -343,7 +343,7 @@ class PermissionController extends BaseController
                 ->getConnectionForTable('tx_beacl_acl');
             $query = $connection->createQueryBuilder();
             $query->getRestrictions()->removeAll();
-            $query->addSelectLiteral('uid,pid, type, object_id, permissions, recursive')
+            $query->addSelectLiteral('*')
                 ->from('tx_beacl_acl')
                 ->where('pid=' . intval($values['uid']) . $recursive);
 
@@ -421,7 +421,7 @@ class PermissionController extends BaseController
             ->getConnectionForTable('tx_beacl_acl');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('uid,pid, type, object_id, permissions, recursive')
+        $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
             ->where('pid=' . intval($pageId));
 
@@ -466,7 +466,7 @@ class PermissionController extends BaseController
             ->getConnectionForTable('pages');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('uid')
+        $query->addSelectLiteral('*')
             ->from('pages')
             ->where('pid=' . intval($pageId) . ' AND deleted=0');
 
