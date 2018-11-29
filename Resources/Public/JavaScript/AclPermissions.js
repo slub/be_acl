@@ -34,7 +34,7 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 			editAclRowTpl = $('#tx_beacl-edit-acl-row-template').html();
 		}
 		return editAclRowTpl;
-	}
+	};
 	/**
 	* generates new hidden field
 	*
@@ -48,14 +48,14 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		hiddenStore.setAttribute('value', value);
 		hiddenStore.setAttribute('name', name);
 		hiddenFields.appendChild(hiddenStore);
-	}
+	};
 	
 	/**
 	* create new ACL ID
 	*/
    AclPermissions.getNewId = function() {
 	   return 'NEW' + Math.round(Math.random()*10000000);
-   }
+   };
 	
 	/**
 	* add ACL
@@ -75,8 +75,8 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 	AclPermissions.removeACL = function(id) {
 		var $tableRow = $('#typo3-permissionMatrix tbody').find('tr[data-acluid="'+ id +'"]');
 		if($tableRow.length) $tableRow.remove();
-	}
-/**
+	};
+	/**
 	 * Group-related: Set the new group by executing an ajax call
 	 *
 	 * @param {Object} $element
@@ -113,13 +113,14 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 			Notification.error(null,error);
 		});
 	};
-	
-	/**
-	* update user and group information
-	*
-	* @param ACLid - ID of ACL
-	* @param objectId - Selected object id
-	*/
+
+    /**
+	 * update user and group information
+	 *
+     * @param ACLid
+     * @param typeVal
+     * @param objectId
+     */
 	AclPermissions.updateUserGroup = function (ACLid,typeVal,objectId) {
 		objectId = objectId || 0;
 		var $container = $(AclPermissions.options.containerSelector),

@@ -16,21 +16,21 @@ namespace JBartels\BeAcl\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Beuser\Controller\PermissionAjaxController as BaseController;
+use JBartels\BeAcl\Exception\RuntimeException;
 
 /**
  * This class extends the permissions module in the TYPO3 Backend to provide
  * convenient methods of editing of page permissions (including page ownership
  * (user and group)) via new AjaxRequestHandler facility
  */
-class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAjaxController
+class PermissionAjaxController extends BaseController
 {
 
     /**
@@ -74,37 +74,64 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
      * The main dispatcher function. Collect data and prepare HTML output.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function dispatch(ServerRequestInterface $request, ResponseInterface $response)
+    public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
+        //in sysext ACL moved to dispatch() method
+        $parsedBody = $request->getParsedBody();
+
+        $this->conf = [
+            'page' => $parsedBody['page'] ?? null,
+            'who' => $parsedBody['who'] ?? null,
+            'mode' => $parsedBody['mode'] ?? null,
+            'bits' => (int)($parsedBody['bits'] ?? 0),
+            'permissions' => (int)($parsedBody['permissions'] ?? 0),
+            'action' => $parsedBody['action'] ?? null,
+            'ownerUid' => (int)($parsedBody['ownerUid'] ?? 0),
+            'username' => $parsedBody['username'] ?? null,
+            'groupUid' => (int)($parsedBody['groupUid'] ?? 0),
+            'groupname' => $parsedBody['groupname'] ?? '',
+            'editLockState' => (int)($parsedBody['editLockState'] ?? 0),
+            'new_owner_uid' => (int)($parsedBody['newOwnerUid'] ?? 0),
+            'new_group_uid' => (int)($parsedBody['newGroupUid'] ?? 0),
+        ];
+
         // Actions handled by this class
         $handledActions = ['delete_acl'];
 
         // Handle action
         $action = $this->conf['action'];
         if ($this->conf['page'] > 0 && in_array($action, $handledActions)) {
-            return $this->handleAction($request, $response, $action);
+            return $this->handleAction($request, $action);
         } // Action handled by parent
         else {
-            return parent::dispatch($request, $response);
+            return parent::dispatch($request);
         }
     }
 
-    protected function handleAction(ServerRequestInterface $request, ResponseInterface $response, $action)
+    /**
+     * @param ServerRequestInterface $request
+     * @param $action
+     * @return mixed
+     */
+    protected function handleAction(ServerRequestInterface $request, $action)
     {
         $methodName = GeneralUtility::underscoredToLowerCamelCase($action);
         if (method_exists($this, $methodName)) {
-            return call_user_func_array(array($this, $methodName), [$request, $response]);
-        } else {
-            $response->getBody()->write('Action method not found');
-            return $response->withStatus(400);
+            return call_user_func_array(array($this, $methodName), [$request]);
         }
     }
 
-    protected function deleteAcl(ServerRequestInterface $request, ResponseInterface $response)
+    /**
+     * The main dispatcher function. Collect data and prepare HTML output.
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    protected function deleteAcl(ServerRequestInterface $request) : ResponseInterface
     {
+        $response = new HtmlResponse('');
         $GLOBALS['LANG']->includeLLFile('EXT:be_acl/Resources/Private/Languages/locallang_perm.xlf');
         $GLOBALS['LANG']->getLL('aclUsers');
 
@@ -142,27 +169,38 @@ class PermissionAjaxController extends \TYPO3\CMS\Beuser\Controller\PermissionAj
         return $response;
     }
 
+    /**
+     * @param $table
+     * @param $id
+     * @param DataHandler $tcemainObj
+     */
     protected function checkModifyAccess($table, $id, DataHandler $tcemainObj)
     {
         // Check modify access
         $modifyAccessList = $tcemainObj->checkModifyAccessList($table);
         // Check basic permissions and circumstances:
         if (!isset($GLOBALS['TCA'][$table]) || $tcemainObj->tableReadOnly($table) || !is_array($tcemainObj->cmdmap[$table]) || !$modifyAccessList) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException($GLOBALS['LANG']->getLL('noPermissionToModifyAcl'));
+            throw new RuntimeException($GLOBALS['LANG']->getLL('noPermissionToModifyAcl'));
         }
 
         // Check table / id
         if (!$GLOBALS['TCA'][$table] || !$id) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
+            throw new RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
         }
 
         // Check edit access
         $hasEditAccess = $tcemainObj->BE_USER->recordEditAccessInternals($table, $id, false, false, true);
         if (!$hasEditAccess) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
+            throw new RuntimeException(sprintf($GLOBALS['LANG']->getLL('noEditAccessToAclRecord'), $id, $table));
         }
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @param $reason
+     * @param int $status
+     * @return static
+     */
     protected function errorResponse(ResponseInterface $response, $reason, $status = 500)
     {
         return $response->withStatus($status, $reason);

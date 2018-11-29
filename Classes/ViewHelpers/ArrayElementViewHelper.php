@@ -18,11 +18,12 @@ use TYPO3\CMS\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3\CMS\Fluid\Core\ViewHelper\Facets\CompilableInterface;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Beuser\ViewHelpers\ArrayElementViewHelper as BaseArrayElementViewHelper;
 
 /**
  * Get a value from an array by given key.
  */
-class ArrayElementViewHelper extends \TYPO3\CMS\Beuser\ViewHelpers\ArrayElementViewHelper implements CompilableInterface
+class ArrayElementViewHelper extends BaseArrayElementViewHelper implements CompilableInterface
 {
 
     /**

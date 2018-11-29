@@ -29,7 +29,8 @@ use TYPO3\CMS\Core\Tests\UnitTestCase;
 /**
  * Unit tests for the timestamp utility.
  */
-class TimestampUtilityTest extends UnitTestCase {
+class TimestampUtilityTest extends UnitTestCase
+{
 
 	/**
 	 * @var \JBartels\BeAcl\Cache\TimestampUtility
@@ -39,7 +40,8 @@ class TimestampUtilityTest extends UnitTestCase {
 	/**
 	 * Initializes the timestamp utility
 	 */
-	public function setUp() {
+	public function setUp()
+    {
 		$this->timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', array('initializeCache'));
 		$this->initializeTimestampCache();
 	}
@@ -47,7 +49,8 @@ class TimestampUtilityTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function newerTimestampThanInCacheIsInvalid() {
+	public function newerTimestampThanInCacheIsInvalid()
+    {
 		$this->timestampUtility->updateTimestamp();
 		$isValid = $this->timestampUtility->permissionTimestampIsValid(time() + 100);
 		$this->assertTrue($isValid);
@@ -56,7 +59,8 @@ class TimestampUtilityTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function olderTimestampThanInCacheIsInvalid() {
+	public function olderTimestampThanInCacheIsInvalid()
+    {
 		$this->timestampUtility->updateTimestamp();
 		$isValid = $this->timestampUtility->permissionTimestampIsValid(time() - 100);
 		$this->assertFalse($isValid);
@@ -65,7 +69,8 @@ class TimestampUtilityTest extends UnitTestCase {
 	/**
 	 * Initializes the cache mock in the timestamp utility.
 	 */
-	protected function initializeTimestampCache() {
+	protected function initializeTimestampCache()
+    {
 		/** @var \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface $cacheMock */
 		$cacheMock = $this->getMock('TYPO3\\CMS\\Core\\Cache\\Frontend\\FrontendInterface', array(), array(), '', FALSE);
 		$this->timestampUtility->setTimestampCache($cacheMock);

@@ -18,6 +18,7 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3\CMS\Fluid\Core\ViewHelper\Facets\CompilableInterface;
+use TYPO3\CMS\Beuser\ViewHelpers\PermissionsViewHelper as BasePermissionsViewHelper;
 
 /**
  * Render permission icon group (user / group / others) of the "Access" module.
@@ -25,7 +26,7 @@ use TYPO3\CMS\Fluid\Core\ViewHelper\Facets\CompilableInterface;
  * Most of that could be done in fluid directly, but this view helper
  * is much better performance wise.
  */
-class PermissionsViewHelper extends \TYPO3\CMS\Beuser\ViewHelpers\PermissionsViewHelper implements CompilableInterface
+class PermissionsViewHelper extends BasePermissionsViewHelper implements CompilableInterface
 {
 
     /**

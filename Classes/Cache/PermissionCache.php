@@ -25,6 +25,11 @@ namespace JBartels\BeAcl\Cache;
  ***************************************************************/
 
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Cache\CacheManager;
+use JBartels\BeAcl\Cache\PermissionCacheData;
+use JBartels\BeAcl\Cache\TimestampUtility;
+use JBartels\BeAcl\Exception\RuntimeException;
 
 /**
  * A cache for storing permission data for a given Backend user
@@ -67,6 +72,8 @@ class PermissionCache implements SingletonInterface
 
     /**
      * Initializes the timestamp utility.
+     *
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     public function __construct()
     {
@@ -164,7 +171,7 @@ class PermissionCache implements SingletonInterface
         $cacheData = $this->getCacheDataForCurrentUser();
 
         if (!$this->isValidCacheData($cacheData)) {
-            $cacheData = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCacheData');
+            $cacheData = GeneralUtility::makeInstance(PermissionCacheData::class);
         }
 
         $cacheData->setPermissionClause($requestedPermissions, $permissionsClause);
@@ -209,7 +216,7 @@ class PermissionCache implements SingletonInterface
     {
 
         if (!isset($this->backendUser)) {
-            throw new \JBartels\BeAcl\Exception\RuntimeException('The Backend user needs to be initializes before the cache identifier can be generated.');
+            throw new RuntimeException('The Backend user needs to be initializes before the cache identifier can be generated.');
         }
 
 		$usergroup_cached_list = str_replace( ',', '_', $this->backendUser->user['usergroup_cached_list'] );
@@ -225,14 +232,15 @@ class PermissionCache implements SingletonInterface
 
     /**
      * Initializes the required cache classes.
+     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
      */
     protected function initializeRequiredClasses()
     {
-        /** @var \TYPO3\CMS\Core\Cache\CacheManager $cacheManager */
-        $cacheManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager');
+        /** @var CacheManager $cacheManager */
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         $this->setPermissionCache($cacheManager->getCache('tx_be_acl_permissions'));
         /** @var TimestampUtility $timestampUtility */
-        $timestampUtility = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\TimestampUtility');
+        $timestampUtility = GeneralUtility::makeInstance(TimestampUtility::class);
         $this->setTimestampUtility($timestampUtility);
     }
 

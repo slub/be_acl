@@ -26,6 +26,8 @@ namespace JBartels\BeAcl\Utility;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use JBartels\BeAcl\Cache\PermissionCache;
 
 /**
  * Backend ACL - Functions re-calculating permissions
@@ -55,7 +57,7 @@ class UserAuthGroup
      */
     public function __construct()
     {
-        $this->db = $GLOBALS['TYPO3_DB'];
+        
     }
 
     /**
@@ -73,7 +75,7 @@ class UserAuthGroup
 
         $row = $params['row'];
 
-        $beAclConfig = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['be_acl']);
+        $beAclConfig = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['be_acl'];
         if (!$beAclConfig['disableOldPermissionSystem']) {
             $out = $params['outputPermissions'];
         } else {
@@ -85,16 +87,24 @@ class UserAuthGroup
         $i = 0;
         $takeUserIntoAccount = 1;
         $groupIdsAlreadyUsed = Array();
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('tx_beacl_acl');
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
         foreach ($rootLine as $values) {
             if ($i != 0) {
                 $recursive = ' AND recursive=1';
             } else {
                 $recursive = '';
             }
-            $res = $this->db->exec_SELECTquery('*', 'tx_beacl_acl', 'pid=' . intval($values['uid']) . $recursive, '',
-                'recursive ASC');
 
-            while ($result = $this->db->sql_fetch_assoc($res)) {
+            $queryBuilder->addSelectLiteral('*')
+                ->from('tx_beacl_acl')
+                ->where('pid=' . intval($values['uid']) . $recursive)
+                ->orderBy('recursive');
+
+            $results = $queryBuilder->execute()->fetchAll();
+            foreach ($results as $result) {
                 if ($result['type'] == 0
                     && ($that->user['uid'] == $result['object_id'])
                     && $takeUserIntoAccount
@@ -136,8 +146,8 @@ class UserAuthGroup
     public function getPagePermsClause($params, $that)
     {
 
-        /** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
-        $permissionCache = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCache');
+        /** @var PermissionCache $permissionCache */
+        $permissionCache = GeneralUtility::makeInstance(PermissionCache::class);
         $permissionCache->setBackendUser($that);
 
         $cachedPermissions = $permissionCache->getPermissionsClause($params['perms']);
@@ -146,7 +156,7 @@ class UserAuthGroup
         }
 
         // get be_acl config in EM
-        $beAclConfig = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['be_acl']);
+        $beAclConfig = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['be_acl'];
         if (!$beAclConfig['disableOldPermissionSystem']) {
             $str = $params['currentClause'];
         } else {
@@ -212,25 +222,30 @@ class UserAuthGroup
         $whereAllow = ') AND (permissions & ' . $perms . ' = ' . $perms . ')';
         $whereDeny = ') AND (permissions & ' . $perms . ' = 0)';
 
-        $res = $this->db->exec_SELECTquery(
-            'pid, recursive',
-            'tx_beacl_acl',
-            $where . $whereAllow
-        );
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('tx_beacl_acl');
+        $query = $connection->createQueryBuilder();
+        $query->getRestrictions()->removeAll();
+        $query->addSelectLiteral('*')
+            ->from('tx_beacl_acl')
+            ->where($where . $whereAllow);
+        $res = $query->execute()->fetchAll();
 
-        while ($result = $this->db->sql_fetch_assoc($res)) {
+        foreach ($res as $result) {
             $aclAllowed[] = $result;
         }
 
         if ($aclAllowed) {
 
             // get all "deny" acls if there are allow ACLs
-            $res = $this->db->exec_SELECTquery(
-                'pid, recursive',
-                'tx_beacl_acl',
-                $where . $whereDeny
-            );
-            while ($result = $this->db->sql_fetch_assoc($res)) {
+            $query = $connection->createQueryBuilder();
+            $query->getRestrictions()->removeAll();
+            $query->addSelectLiteral('*')
+                ->from('tx_beacl_acl')
+                ->where($where . $whereDeny);
+            $res = $query->execute()->fetchAll();
+
+            foreach ($res as $result) {
 
                 // only one ACL per group/user per page is allowed, that's why this line imposes no problem. It rather increases speed.
                 $this->aclDisallowed[$result['pid']] = $result['recursive'];
@@ -270,9 +285,17 @@ class UserAuthGroup
             $this->aclPageList[$pid] = $pid;
         }
 
-        // find subpages and call function itself again
-        $res = $this->db->exec_SELECTquery('uid', 'pages', 'pid=' . intval($pid) . ' AND deleted=0');
-        while ($result = $this->db->sql_fetch_assoc($res)) {
+
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('pages');
+        $query = $connection->createQueryBuilder();
+        $query->getRestrictions()->removeAll();
+        $query->addSelectLiteral('*')
+            ->from('pages')
+            ->where('pid=' . intval($pid) . ' AND deleted=0');
+        $res = $query->execute()->fetchAll();
+
+        foreach ($res as $result) {
             $this->aclTraversePageTree($result['uid']);
         }
     }

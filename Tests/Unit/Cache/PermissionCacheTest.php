@@ -25,11 +25,16 @@ namespace JBartels\BeAcl\Tests\Unit\Cache;
  ***************************************************************/
 
 use TYPO3\CMS\Core\Tests\UnitTestCase;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend;
+use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 
 /**
  * Tests for the permission cache.
  */
-class PermissionCacheTest extends UnitTestCase {
+class PermissionCacheTest extends UnitTestCase
+{
 
 	/**
 	 * @var \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
@@ -63,16 +68,18 @@ class PermissionCacheTest extends UnitTestCase {
 	/**
 	 * Initializes the permission cache
 	 */
-	public function setUp() {
+	public function setUp()
+    {
 
-		/** @var \TYPO3\CMS\Core\Authentication\BackendUserAuthentication $backendUser */
-		$this->backendUser = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication');
+		/** @var BackendUserAuthentication $backendUser */
+		$this->backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);
 	}
 
 	/**
 	 * @test
 	 */
-	public function flushingCacheInvalidatesPreviouslySetFirstLevelCache() {
+	public function flushingCacheInvalidatesPreviouslySetFirstLevelCache()
+    {
 		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
 
 		/** @var \JBartels\BeAcl\Cache\TimestampUtility|\PHPUnit_Framework_MockObject_MockObject $timestampUtility */
@@ -90,7 +97,8 @@ class PermissionCacheTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function flushingCacheInvalidatesPreviouslySetSecondLevelCache() {
+	public function flushingCacheInvalidatesPreviouslySetSecondLevelCache()
+    {
 
 		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
 		$this->permissionCache->disableFirstLevelCache();
@@ -110,7 +118,8 @@ class PermissionCacheTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function previouslySetCacheValueIsReturnedByFirstLevelCache() {
+	public function previouslySetCacheValueIsReturnedByFirstLevelCache()
+    {
 		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
 		$this->permissionCache->setPermissionsClause($this->permissionsClauseCacheKey, $this->permissionsClauseCacheValue);
 		$cachedValue = $this->permissionCache->getPermissionsClause($this->permissionsClauseCacheKey);
@@ -120,7 +129,8 @@ class PermissionCacheTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function previouslySetCacheValueIsReturnedBySecondLevelCache() {
+	public function previouslySetCacheValueIsReturnedBySecondLevelCache()
+    {
 
 		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
 
@@ -138,14 +148,15 @@ class PermissionCacheTest extends UnitTestCase {
 	/**
 	 * @param array $mockedMethods
 	 */
-	protected function initializePermissionCacheMock($mockedMethods) {
+	protected function initializePermissionCacheMock($mockedMethods)
+    {
 
 		/** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
 		$permissionCache = $this->getMock('JBartels\\BeAcl\\Cache\\PermissionCache', $mockedMethods);
 		$permissionCache->setBackendUser($this->backendUser);
 
-		$cacheBackend = new \TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend('Testing');
-		$cacheFrontend = new \TYPO3\CMS\Core\Cache\Frontend\VariableFrontend('tx_be_acl_permissions', $cacheBackend);
+		$cacheBackend = new TransientMemoryBackend('Testing');
+		$cacheFrontend = new VariableFrontend('tx_be_acl_permissions', $cacheBackend);
 
 		$permissionCache->setPermissionCache($cacheFrontend);
 
