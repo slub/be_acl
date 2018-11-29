@@ -217,10 +217,10 @@ class UserAuthGroup
 
         // 1. fetch all ACLs relevant for the current user/group
         $aclAllowed = Array();
-        $where = ' ( (type = ' . intval($type) . ' AND object_id = ' . intval($object_id) . ')';
+        $where = ' ( (`type` = ' . intval($type) . ' AND `object_id` = ' . intval($object_id) . ')';
 
-        $whereAllow = ') AND (permissions & ' . $perms . ' = ' . $perms . ')';
-        $whereDeny = ') AND (permissions & ' . $perms . ' = 0)';
+        $whereAllow = ') AND (`permissions` & ' . $perms . ' = ' . $perms . ')';
+        $whereDeny = ') AND (`permissions` & ' . $perms . ' = 0)';
 
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
@@ -292,7 +292,7 @@ class UserAuthGroup
         $query->getRestrictions()->removeAll();
         $query->addSelectLiteral('*')
             ->from('pages')
-            ->where('pid=' . intval($pid) . ' AND deleted=0');
+            ->where('`pid` = ' . intval($pid) . ' AND `deleted` = 0');
         $res = $query->execute()->fetchAll();
 
         foreach ($res as $result) {
