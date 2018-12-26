@@ -189,7 +189,7 @@ class PermissionController extends BaseController
         $query->getRestrictions()->removeAll();
         $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
-            ->where('pid=' . (int)$this->id);
+            ->where('`pid` = ' . (int)$this->id);
         $res = $query->execute()->fetchAll();
         $pageAcls = array();
 
@@ -245,7 +245,7 @@ class PermissionController extends BaseController
         $query->getRestrictions()->removeAll();
         $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
-            ->where("tx_beacl_acl.type=$type");
+            ->where("`type` = $type");
 
         $result = $query->execute()->fetchAll();
         return $result;
@@ -337,7 +337,7 @@ class PermissionController extends BaseController
 
         // Iterate rootline, looking for recursive ACLs that may apply to the current page
         foreach ($rootLine as $level => $values) {
-            $recursive = ' AND recursive=1';
+            $recursive = ' AND `recursive` = 1';
 
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)
                 ->getConnectionForTable('tx_beacl_acl');
@@ -345,7 +345,7 @@ class PermissionController extends BaseController
             $query->getRestrictions()->removeAll();
             $query->addSelectLiteral('*')
                 ->from('tx_beacl_acl')
-                ->where('pid=' . intval($values['uid']) . $recursive);
+                ->where('`pid` = ' . intval($values['uid']) . $recursive);
 
             $res = $query->execute()->fetchAll();
 
@@ -423,7 +423,7 @@ class PermissionController extends BaseController
         $query->getRestrictions()->removeAll();
         $query->addSelectLiteral('*')
             ->from('tx_beacl_acl')
-            ->where('pid=' . intval($pageId));
+            ->where('`pid` = ' . intval($pageId));
 
         $res = $query->execute()->fetchAll();
         $hasNoRecursive = array();
@@ -468,7 +468,7 @@ class PermissionController extends BaseController
         $query->getRestrictions()->removeAll();
         $query->addSelectLiteral('*')
             ->from('pages')
-            ->where('pid=' . intval($pageId) . ' AND deleted=0');
+            ->where('`pid` =' . intval($pageId) . ' AND `deleted` = 0');
 
         $res = $query->execute()->fetchAll();
 
