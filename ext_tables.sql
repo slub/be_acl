@@ -12,6 +12,6 @@ CREATE TABLE tx_beacl_acl (
 	permissions int(11) unsigned DEFAULT '0' NOT NULL,
 	recursive tinyint(1) unsigned DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	UNIQUE KEY uniqueacls (pid,type,object_id,recursive)
+	UNIQUE KEY uniqueacls (pid,type,object_id,recursive),
 	KEY parent (pid)
 );
