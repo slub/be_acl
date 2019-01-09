@@ -108,8 +108,11 @@ class UserAuthGroup
 
             $queryBuilder->select('*')
                 ->from('tx_beacl_acl')
-                ->where($constraints)
                 ->orderBy('recursive');
+
+            foreach ($constraints as $constraint) {
+                $queryBuilder->andWhere($constraint);
+            }
 
             $results = $queryBuilder->execute()->fetchAll();
             foreach ($results as $result) {
@@ -246,7 +249,7 @@ class UserAuthGroup
             $queryBuilder->expr()->comparison(
                 $queryBuilder->expr()->bitAnd('permissions', $perms),
                 ExpressionBuilder::EQ,
-                $perms
+                $queryBuilder->createNamedParameter($perms, \PDO::PARAM_INT)
             )
         ];
 
@@ -259,9 +262,11 @@ class UserAuthGroup
         ];
 
         $queryBuilder->getRestrictions()->removeAll();
-        $queryBuilder->select('*')
-            ->from('tx_beacl_acl')
-            ->where(array_merge($where, $whereAllow));
+        $queryBuilder->select('*')->from('tx_beacl_acl');
+
+        foreach (array_merge($where, $whereAllow) as $constraint) {
+            $queryBuilder->andWhere($constraintsItem);
+        }
         $result = $queryBuilder->execute()->fetchAll();
 
         foreach ($result as $resultItem) {
@@ -273,9 +278,11 @@ class UserAuthGroup
             // get all "deny" acls if there are allow ACLs
             $queryBuilder = $connection->createQueryBuilder();
             $queryBuilder->getRestrictions()->removeAll();
-            $queryBuilder->select('*')
-                ->from('tx_beacl_acl')
-                ->where(array_merge($where, $whereDeny));
+            $queryBuilder->select('*')->from('tx_beacl_acl');
+            foreach (array_merge($where, $whereDeny) as $constraint) {
+                $queryBuilder->andWhere($constraintsItem);
+            }
+
             $result = $queryBuilder->execute()->fetchAll();
 
             foreach ($result as $resultItem) {
