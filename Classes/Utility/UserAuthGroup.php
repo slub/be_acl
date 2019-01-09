@@ -92,15 +92,22 @@ class UserAuthGroup
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll();
         foreach ($rootLine as $values) {
-            if ($i != 0) {
-                $recursive = ' AND recursive=1';
-            } else {
-                $recursive = '';
-            }
 
-            $queryBuilder->addSelectLiteral('*')
+            $constraints = [];
+            if ($i != 0) {
+                $constraints[] = $queryBuilder->expr()->eq(
+                    'recursive',
+                    $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
+                );
+            }
+            $constraints[] = $queryBuilder->expr()->eq(
+                'pid',
+                $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
+            );
+
+            $queryBuilder->select('*')
                 ->from('tx_beacl_acl')
-                ->where('pid=' . intval($values['uid']) . $recursive)
+                ->where($constraints)
                 ->orderBy('recursive');
 
             $results = $queryBuilder->execute()->fetchAll();
@@ -226,7 +233,7 @@ class UserAuthGroup
             ->getConnectionForTable('tx_beacl_acl');
         $query = $connection->createQueryBuilder();
         $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $query->select('*')
             ->from('tx_beacl_acl')
             ->where($where . $whereAllow);
         $res = $query->execute()->fetchAll();
@@ -240,7 +247,7 @@ class UserAuthGroup
             // get all "deny" acls if there are allow ACLs
             $query = $connection->createQueryBuilder();
             $query->getRestrictions()->removeAll();
-            $query->addSelectLiteral('*')
+            $query->select('*')
                 ->from('tx_beacl_acl')
                 ->where($where . $whereDeny);
             $res = $query->execute()->fetchAll();
@@ -288,15 +295,25 @@ class UserAuthGroup
 
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('pages');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('pages')
-            ->where('`pid` = ' . intval($pid) . ' AND `deleted` = 0');
-        $res = $query->execute()->fetchAll();
+            ->where(
+                $queryBuilder->expr()->eq(
+                'pid',
+                $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
+                )
+            );
 
-        foreach ($res as $result) {
-            $this->aclTraversePageTree($result['uid']);
+        $result = $queryBuilder->execute()->fetchAll();
+
+        foreach ($result as $resultItem) {
+            $this->aclTraversePageTree($resultItem['uid']);
         }
     }
 }

@@ -185,16 +185,22 @@ class PermissionController extends BaseController
         // ACL CODE
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where('`pid` = ' . (int)$this->id);
-        $res = $query->execute()->fetchAll();
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($this->id, \PDO::PARAM_INT)
+                )
+            );
+
+        $result = $queryBuilder->execute()->fetchAll();
         $pageAcls = array();
 
-        foreach ($res as $result) {
-            $pageAcls[] = $result;
+        foreach ($result as $resultItem) {
+            $pageAcls[] = $resultItem;
         }
 
         $userGroupSelectorOptions = array();
@@ -241,13 +247,18 @@ class PermissionController extends BaseController
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where("`type` = $type");
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'type',
+                    $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
+                )
+            );
 
-        $result = $query->execute()->fetchAll();
+        $result = $queryBuilder->execute()->fetchAll();
         return $result;
     }
 
@@ -337,17 +348,25 @@ class PermissionController extends BaseController
 
         // Iterate rootline, looking for recursive ACLs that may apply to the current page
         foreach ($rootLine as $level => $values) {
-            $recursive = ' AND `recursive` = 1';
 
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)
                 ->getConnectionForTable('tx_beacl_acl');
-            $query = $connection->createQueryBuilder();
-            $query->getRestrictions()->removeAll();
-            $query->addSelectLiteral('*')
+            $queryBuilder = $connection->createQueryBuilder();
+            $queryBuilder->getRestrictions()->removeAll();
+            $queryBuilder->select('*')
                 ->from('tx_beacl_acl')
-                ->where('`pid` = ' . intval($values['uid']) . $recursive);
+                ->where(
+                    $queryBuilder->expr()->eq(
+                        'recursive',
+                        $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'pid',
+                        $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
+                    )
+                );
 
-            $res = $query->execute()->fetchAll();
+            $res = $queryBuilder->execute()->fetchAll();
 
             foreach ($res as $result) {
                 // User type ACLs
@@ -419,13 +438,17 @@ class PermissionController extends BaseController
         // Fetch ACLs aasigned to given page
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where('`pid` = ' . intval($pageId));
-
-        $res = $query->execute()->fetchAll();
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                )
+            );
+        $res = $queryBuilder->execute()->fetchAll();
         $hasNoRecursive = array();
         $this->aclList[$pageId] = $parentACLs;
 
@@ -464,13 +487,23 @@ class PermissionController extends BaseController
         // Find child pages and their ACL permissions
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('pages');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
-            ->from('pages')
-            ->where('`pid` =' . intval($pageId) . ' AND `deleted` = 0');
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
 
-        $res = $query->execute()->fetchAll();
+        $queryBuilder->select('*')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
+                )
+            );
+
+        $res = $queryBuilder->execute()->fetchAll();
 
         if($res[0]){
             foreach ($res as $result) {
