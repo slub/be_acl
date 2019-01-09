@@ -80,12 +80,12 @@ class PermissionCacheTest extends UnitTestCase
 	 */
 	public function flushingCacheInvalidatesPreviouslySetFirstLevelCache()
     {
-		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
+		$this->initializePermissionCacheMock(['initializeRequiredClasses']);
 
 		/** @var \JBartels\BeAcl\Cache\TimestampUtility|\PHPUnit_Framework_MockObject_MockObject $timestampUtility */
-		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', array('updateTimestamp', 'permissionTimestampIsValid'));
+		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', ['updateTimestamp', 'permissionTimestampIsValid']);
 		$timestampUtility->expects($this->once())->method('updateTimestamp');
-		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(FALSE));
+		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(false));
 		$this->permissionCache->setTimestampUtility($timestampUtility);
 
 		$this->permissionCache->setPermissionsClause($this->permissionsClauseCacheKey, $this->permissionsClauseCacheValue);
@@ -100,13 +100,13 @@ class PermissionCacheTest extends UnitTestCase
 	public function flushingCacheInvalidatesPreviouslySetSecondLevelCache()
     {
 
-		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
+		$this->initializePermissionCacheMock(['initializeRequiredClasses']);
 		$this->permissionCache->disableFirstLevelCache();
 
 		/** @var \JBartels\BeAcl\Cache\TimestampUtility|\PHPUnit_Framework_MockObject_MockObject $timestampUtility */
-		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', array('updateTimestamp', 'permissionTimestampIsValid'));
+		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', ['updateTimestamp', 'permissionTimestampIsValid']);
 		$timestampUtility->expects($this->once())->method('updateTimestamp');
-		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(FALSE));
+		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(false));
 		$this->permissionCache->setTimestampUtility($timestampUtility);
 
 		$this->permissionCache->setPermissionsClause($this->permissionsClauseCacheKey, $this->permissionsClauseCacheValue);
@@ -120,7 +120,7 @@ class PermissionCacheTest extends UnitTestCase
 	 */
 	public function previouslySetCacheValueIsReturnedByFirstLevelCache()
     {
-		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
+		$this->initializePermissionCacheMock(['initializeRequiredClasses']);
 		$this->permissionCache->setPermissionsClause($this->permissionsClauseCacheKey, $this->permissionsClauseCacheValue);
 		$cachedValue = $this->permissionCache->getPermissionsClause($this->permissionsClauseCacheKey);
 		$this->assertEquals($this->permissionsClauseCacheValue, $cachedValue);
@@ -132,11 +132,11 @@ class PermissionCacheTest extends UnitTestCase
 	public function previouslySetCacheValueIsReturnedBySecondLevelCache()
     {
 
-		$this->initializePermissionCacheMock(array('initializeRequiredClasses'));
+		$this->initializePermissionCacheMock(['initializeRequiredClasses']);
 
 		/** @var \JBartels\BeAcl\Cache\TimestampUtility|\PHPUnit_Framework_MockObject_MockObject $timestampUtility */
-		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', array('permissionTimestampIsValid'));
-		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(TRUE));
+		$timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', ['permissionTimestampIsValid']);
+		$timestampUtility->expects($this->once())->method('permissionTimestampIsValid')->will($this->returnValue(true));
 		$this->permissionCache->setTimestampUtility($timestampUtility);
 
 		$this->permissionCache->disableFirstLevelCache();

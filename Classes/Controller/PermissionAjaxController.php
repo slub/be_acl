@@ -66,7 +66,7 @@ class PermissionAjaxController extends BaseController
     protected function initializeView()
     {
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->view->setPartialRootPaths(array('default' => $this->extPath . 'Resources/Private/Partials'));
+        $this->view->setPartialRootPaths(['default' => $this->extPath . 'Resources/Private/Partials']);
         $this->view->assign('pageId', $this->conf['page']);
     }
 
@@ -119,7 +119,7 @@ class PermissionAjaxController extends BaseController
     {
         $methodName = GeneralUtility::underscoredToLowerCamelCase($action);
         if (method_exists($this, $methodName)) {
-            return call_user_func_array(array($this, $methodName), [$request]);
+            return call_user_func_array([$this, $methodName], [$request]);
         }
     }
 
@@ -153,7 +153,7 @@ class PermissionAjaxController extends BaseController
             // Process command map
             $tce = GeneralUtility::makeInstance(DataHandler::class);
             $tce->stripslashes_values = 0;
-            $tce->start(array(), $cmdMap);
+            $tce->start([], $cmdMap);
             $this->checkModifyAccess($this->table, $aclUid, $tce);
             $tce->process_cmdmap();
         } catch (\Exception $ex) {

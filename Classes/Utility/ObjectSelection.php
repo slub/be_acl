@@ -52,12 +52,12 @@ class ObjectSelection
         }
 
         // Resetting the SELECT field items
-        $PA['items'] = array(
-            0 => array(
+        $PA['items'] = [
+            0 => [
                 0 => '',
                 1 => '',
-            ),
-        );
+            ],
+        ];
         $type = isset($PA['row']['type'][0]) ? $PA['row']['type'][0] : null;
         // Get users or groups - The function copies functionality of the method acl_objectSelector()
         // of ux_SC_mod_web_perm_index class as for non-admins it returns only:
@@ -73,10 +73,10 @@ class ObjectSelection
                 }
 
                 foreach ($items as $row) {
-                    $PA['items'][] = array(
+                    $PA['items'][] = [
                         0 => $row['username'],
                         1 => $row['uid'],
-                    );
+                    ];
                 }
                 break;
 
@@ -88,10 +88,10 @@ class ObjectSelection
                 }
 
                 foreach ($items as $row) {
-                    $PA['items'][] = array(
+                    $PA['items'][] = [
                         0 => $row['title'],
                         1 => $row['uid'],
-                    );
+                    ];
                 }
                 break;
 

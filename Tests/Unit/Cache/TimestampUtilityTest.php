@@ -42,7 +42,7 @@ class TimestampUtilityTest extends UnitTestCase
 	 */
 	public function setUp()
     {
-		$this->timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', array('initializeCache'));
+		$this->timestampUtility = $this->getMock('JBartels\\BeAcl\\Cache\\TimestampUtility', ['initializeCache']);
 		$this->initializeTimestampCache();
 	}
 
@@ -72,7 +72,7 @@ class TimestampUtilityTest extends UnitTestCase
 	protected function initializeTimestampCache()
     {
 		/** @var \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface $cacheMock */
-		$cacheMock = $this->getMock('TYPO3\\CMS\\Core\\Cache\\Frontend\\FrontendInterface', array(), array(), '', FALSE);
+		$cacheMock = $this->getMock('TYPO3\\CMS\\Core\\Cache\\Frontend\\FrontendInterface', [], [], '', false);
 		$this->timestampUtility->setTimestampCache($cacheMock);
 	}
 }

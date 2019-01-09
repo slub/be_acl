@@ -43,7 +43,7 @@ class PermissionsViewHelper extends BasePermissionsViewHelper implements Compila
         \Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
     ) {
-        $masks = array(1, 16, 2, 4, 8);
+        $masks = [1, 16, 2, 4, 8];
 
         if (empty(static::$permissionLabels)) {
             foreach ($masks as $mask) {
