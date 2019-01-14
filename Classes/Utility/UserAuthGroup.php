@@ -232,9 +232,10 @@ class UserAuthGroup
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
         $queryBuilder = $connection->createQueryBuilder();
-
-        // constraints
-        $where = [
+        
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')->from('tx_beacl_acl');
+        $queryBuilder->where(
             $queryBuilder->expr()->eq(
                 'type',
                 $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
@@ -242,31 +243,14 @@ class UserAuthGroup
             $queryBuilder->expr()->eq(
                 'object_id',
                 $queryBuilder->createNamedParameter($object_id, \PDO::PARAM_INT)
-            )
-        ];
-
-        $whereAllow = [
+            ),
             $queryBuilder->expr()->comparison(
                 $queryBuilder->expr()->bitAnd('permissions', $perms),
                 ExpressionBuilder::EQ,
                 $queryBuilder->createNamedParameter($perms, \PDO::PARAM_INT)
             )
-        ];
 
-        $whereDeny = [
-            $queryBuilder->expr()->comparison(
-                $queryBuilder->expr()->bitAnd('permissions', $perms),
-                ExpressionBuilder::EQ,
-                $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
-            )
-        ];
-
-        $queryBuilder->getRestrictions()->removeAll();
-        $queryBuilder->select('*')->from('tx_beacl_acl');
-
-        foreach (array_merge($where, $whereAllow) as $constraint) {
-            $queryBuilder->andWhere($constraintsItem);
-        }
+        );
         $result = $queryBuilder->execute()->fetchAll();
 
         foreach ($result as $resultItem) {
@@ -279,9 +263,21 @@ class UserAuthGroup
             $queryBuilder = $connection->createQueryBuilder();
             $queryBuilder->getRestrictions()->removeAll();
             $queryBuilder->select('*')->from('tx_beacl_acl');
-            foreach (array_merge($where, $whereDeny) as $constraint) {
-                $queryBuilder->andWhere($constraintsItem);
-            }
+            $queryBuilder->where(
+                $queryBuilder->expr()->eq(
+                    'type',
+                    $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq(
+                    'object_id',
+                    $queryBuilder->createNamedParameter($object_id, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->comparison(
+                    $queryBuilder->expr()->bitAnd('permissions', $perms),
+                    ExpressionBuilder::EQ,
+                    $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                )
+            );
 
             $result = $queryBuilder->execute()->fetchAll();
 
