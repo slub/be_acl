@@ -192,7 +192,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    (int)$this->id
+                    $queryBuilder->createNamedParameter($this->id, \PDO::PARAM_INT)
                 )
             );
 
@@ -254,7 +254,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'type',
-                    (int)$type
+                    $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
                 )
             );
 
@@ -358,11 +358,11 @@ class PermissionController extends BaseController
                 ->where(
                     $queryBuilder->expr()->eq(
                         'recursive',
-                        1
+                        $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
                     ),
                     $queryBuilder->expr()->eq(
                         'pid',
-                        (int)$values['uid']
+                        $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
                     )
                 );
 
@@ -445,7 +445,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    (int)$pageId
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
                 )
             );
         $result = $queryBuilder->execute()->fetchAll();
@@ -495,11 +495,11 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    (int)$pageId
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->eq(
                     'deleted',
-                    0
+                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
                 )
             );
 
