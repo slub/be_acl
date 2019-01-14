@@ -98,12 +98,12 @@ class UserAuthGroup
             if ($i != 0) {
                 $constraints[] = $queryBuilder->expr()->eq(
                     'recursive',
-                    $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
+                    1
                 );
             }
             $constraints[] = $queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
+                (int)$values['uid']
             );
 
             $queryBuilder->select('*')
@@ -237,11 +237,11 @@ class UserAuthGroup
         $where = [
             $queryBuilder->expr()->eq(
                 'type',
-                $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
+                (int)$type
             ),
             $queryBuilder->expr()->eq(
                 'object_id',
-                $queryBuilder->createNamedParameter($object_id, \PDO::PARAM_INT)
+                (int)$object_id
             )
         ];
 
@@ -249,7 +249,7 @@ class UserAuthGroup
             $queryBuilder->expr()->comparison(
                 $queryBuilder->expr()->bitAnd('permissions', $perms),
                 ExpressionBuilder::EQ,
-                $queryBuilder->createNamedParameter($perms, \PDO::PARAM_INT)
+                (int)$perms
             )
         ];
 
@@ -257,7 +257,7 @@ class UserAuthGroup
             $queryBuilder->expr()->comparison(
                 $queryBuilder->expr()->bitAnd('permissions', $perms),
                 ExpressionBuilder::EQ,
-                $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+                0
             )
         ];
 
@@ -265,7 +265,7 @@ class UserAuthGroup
         $queryBuilder->select('*')->from('tx_beacl_acl');
 
         foreach (array_merge($where, $whereAllow) as $constraint) {
-            $queryBuilder->andWhere($constraintsItem);
+            $queryBuilder->andWhere($constraint);
         }
         $result = $queryBuilder->execute()->fetchAll();
 
@@ -280,7 +280,7 @@ class UserAuthGroup
             $queryBuilder->getRestrictions()->removeAll();
             $queryBuilder->select('*')->from('tx_beacl_acl');
             foreach (array_merge($where, $whereDeny) as $constraint) {
-                $queryBuilder->andWhere($constraintsItem);
+                $queryBuilder->andWhere($constraint);
             }
 
             $result = $queryBuilder->execute()->fetchAll();
@@ -335,11 +335,11 @@ class UserAuthGroup
             ->where(
                 $queryBuilder->expr()->eq(
                 'pid',
-                $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                (int)$pid
                 ),
                 $queryBuilder->expr()->eq(
                     'deleted',
-                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
+                    0
                 )
             );
 

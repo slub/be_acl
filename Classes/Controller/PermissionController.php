@@ -192,7 +192,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($this->id, \PDO::PARAM_INT)
+                    (int)$this->id
                 )
             );
 
@@ -254,7 +254,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'type',
-                    $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
+                    (int)$type
                 )
             );
 
@@ -358,11 +358,11 @@ class PermissionController extends BaseController
                 ->where(
                     $queryBuilder->expr()->eq(
                         'recursive',
-                        $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
+                        1
                     ),
                     $queryBuilder->expr()->eq(
                         'pid',
-                        $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
+                        (int)$values['uid']
                     )
                 );
 
@@ -445,7 +445,7 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                    (int)$pageId
                 )
             );
         $result = $queryBuilder->execute()->fetchAll();
@@ -495,11 +495,11 @@ class PermissionController extends BaseController
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                    (int)$pageId
                 ),
                 $queryBuilder->expr()->eq(
                     'deleted',
-                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
+                    0
                 )
             );
 
