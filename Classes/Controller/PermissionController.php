@@ -185,20 +185,26 @@ class PermissionController extends BaseController
         // ACL CODE
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where('`pid` = ' . (int)$this->id);
-        $res = $query->execute()->fetchAll();
-        $pageAcls = array();
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($this->id, \PDO::PARAM_INT)
+                )
+            );
 
-        foreach ($res as $result) {
-            $pageAcls[] = $result;
+        $result = $queryBuilder->execute()->fetchAll();
+        $pageAcls = [];
+
+        foreach ($result as $resultItem) {
+            $pageAcls[] = $resultItem;
         }
 
-        $userGroupSelectorOptions = array();
-        foreach (array(1 => 'Group', 0 => 'User') as $type => $label) {
+        $userGroupSelectorOptions = [];
+        foreach ([1 => 'Group', 0 => 'User'] as $type => $label) {
             $option = new \stdClass();
             $option->key = $type;
             $option->value = LocalizationUtility::translate('LLL:EXT:be_acl/Resources/Private/Languages/locallang_perm.xlf:acl' . $label,
@@ -221,7 +227,7 @@ class PermissionController extends BaseController
         // Process data map
         $tce = GeneralUtility::makeInstance(DataHandler::class);
         $tce->stripslashes_values = 0;
-        $tce->start($data, array());
+        $tce->start($data, []);
         $tce->process_datamap();
 
         parent::updateAction($data, $mirror);
@@ -241,13 +247,18 @@ class PermissionController extends BaseController
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where("`type` = $type");
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'type',
+                    $queryBuilder->createNamedParameter($type, \PDO::PARAM_INT)
+                )
+            );
 
-        $result = $query->execute()->fetchAll();
+        $result = $queryBuilder->execute()->fetchAll();
         return $result;
     }
 
@@ -273,11 +284,11 @@ class PermissionController extends BaseController
         $currentSelection = [];
 
         // Run query
-        $res = $this->aclObjectQuery($type);
+        $result = $this->aclObjectQuery($type);
 
         // Process results
-        foreach ($res as $result) {
-            $aclObjects[$result['object_id']] = $result;
+        foreach ($result as $resultItem) {
+            $aclObjects[$resultItem['object_id']] = $resultItem;
         }
         // Check results
         if (empty($aclObjects)) {
@@ -287,10 +298,10 @@ class PermissionController extends BaseController
         // If filter selector is enabled, then determine currently selected items
         if ($conf['enableFilterSelector']) {
             // get current selection from UC, merge data, write it back to UC
-            $currentSelection = is_array($BE_USER->uc['moduleData']['txbeacl_aclSelector'][$type]) ? $BE_USER->uc['moduleData']['txbeacl_aclSelector'][$type] : array();
+            $currentSelection = is_array($BE_USER->uc['moduleData']['txbeacl_aclSelector'][$type]) ? $BE_USER->uc['moduleData']['txbeacl_aclSelector'][$type] : [];
 
             $currentSelectionOverride_raw = GeneralUtility::_GP('tx_beacl_objsel');
-            $currentSelectionOverride = array();
+            $currentSelectionOverride = [];
             if (is_array($currentSelectionOverride_raw[$type])) {
                 foreach ($currentSelectionOverride_raw[$type] as $tmp) {
                     $currentSelectionOverride[$tmp] = $tmp;
@@ -337,41 +348,49 @@ class PermissionController extends BaseController
 
         // Iterate rootline, looking for recursive ACLs that may apply to the current page
         foreach ($rootLine as $level => $values) {
-            $recursive = ' AND `recursive` = 1';
 
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)
                 ->getConnectionForTable('tx_beacl_acl');
-            $query = $connection->createQueryBuilder();
-            $query->getRestrictions()->removeAll();
-            $query->addSelectLiteral('*')
+            $queryBuilder = $connection->createQueryBuilder();
+            $queryBuilder->getRestrictions()->removeAll();
+            $queryBuilder->select('*')
                 ->from('tx_beacl_acl')
-                ->where('`pid` = ' . intval($values['uid']) . $recursive);
+                ->where(
+                    $queryBuilder->expr()->eq(
+                        'recursive',
+                        $queryBuilder->createNamedParameter(1, \PDO::PARAM_INT)
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'pid',
+                        $queryBuilder->createNamedParameter($values['uid'], \PDO::PARAM_INT)
+                    )
+                );
 
-            $res = $query->execute()->fetchAll();
+            $result = $queryBuilder->execute()->fetchAll();
 
-            foreach ($res as $result) {
+            foreach ($result as $resultItem) {
                 // User type ACLs
-                if ($result['type'] == 0
-                    && in_array($result['object_id'], $users)
-                    && !array_key_exists($result['object_id'], $startPerms[0])
+                if ($resultItem['type'] == 0
+                    && in_array($resultItem['object_id'], $users)
+                    && !array_key_exists($resultItem['object_id'], $startPerms[0])
                 ) {
-                    $startPerms[0][$result['object_id']] = [
-                        'uid' => $result['uid'],
-                        'permissions' => $result['permissions'],
-                        'recursive' => $result['recursive'],
-                        'pid' => $result['pid']
+                    $startPerms[0][$resultItem['object_id']] = [
+                        'uid' => $resultItem['uid'],
+                        'permissions' => $resultItem['permissions'],
+                        'recursive' => $resultItem['recursive'],
+                        'pid' => $resultItem['pid']
                     ];
                 }
                 // Group type ACLs
-                elseif ($result['type'] == 1
-                    && in_array($result['object_id'], $groups)
-                    && !array_key_exists($result['object_id'], $startPerms[1])
+                elseif ($resultItem['type'] == 1
+                    && in_array($resultItem['object_id'], $groups)
+                    && !array_key_exists($resultItem['object_id'], $startPerms[1])
                 ) {
-                    $startPerms[1][$result['object_id']] = [
-                        'uid' => $result['uid'],
-                        'permissions' => $result['permissions'],
-                        'recursive' => $result['recursive'],
-                        'pid' => $result['pid']
+                    $startPerms[1][$resultItem['object_id']] = [
+                        'uid' => $resultItem['uid'],
+                        'permissions' => $resultItem['permissions'],
+                        'recursive' => $resultItem['recursive'],
+                        'pid' => $resultItem['pid']
                     ];
                 }
             }
@@ -419,62 +438,76 @@ class PermissionController extends BaseController
         // Fetch ACLs aasigned to given page
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('tx_beacl_acl');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+        $queryBuilder->select('*')
             ->from('tx_beacl_acl')
-            ->where('`pid` = ' . intval($pageId));
-
-        $res = $query->execute()->fetchAll();
-        $hasNoRecursive = array();
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                )
+            );
+        $result = $queryBuilder->execute()->fetchAll();
+        $hasNoRecursive = [];
         $this->aclList[$pageId] = $parentACLs;
 
         $this->addAclMetaData($this->aclList[$pageId]);
 
-        foreach ($res as $result) {
-            $aclData = array(
-                'uid' => $result['uid'],
-                'permissions' => $result['permissions'],
-                'recursive' => $result['recursive'],
-                'pid' => $result['pid']
-            );
+        foreach ($result as $resultItem) {
+            $aclData = [
+                'uid' => $resultItem['uid'],
+                'permissions' => $resultItem['permissions'],
+                'recursive' => $resultItem['recursive'],
+                'pid' => $resultItem['pid']
+            ];
 
             // Non-recursive ACL
-            if ($result['recursive'] == 0) {
-                $this->aclList[$pageId][$result['type']][$result['object_id']] = $aclData;
-                $hasNoRecursive[$pageId][$result['type']][$result['object_id']] = $aclData;
+            if ($resultItem['recursive'] == 0) {
+                $this->aclList[$pageId][$resultItem['type']][$resultItem['object_id']] = $aclData;
+                $hasNoRecursive[$pageId][$resultItem['type']][$resultItem['object_id']] = $aclData;
             }
             else {
                 // Recursive ACL
                 // Add to parent ACLs for sub-pages
-                $parentACLs[$result['type']][$result['object_id']] = $aclData;
+                $parentACLs[$resultItem['type']][$resultItem['object_id']] = $aclData;
                 // If there also is a non-recursive ACL for this object_id, that takes precedence
                 // for this page. Otherwise, add it to the ACL list.
-                if (is_array($hasNoRecursive[$pageId][$result['type']][$result['object_id']])) {
-                    $this->aclList[$pageId][$result['type']][$result['object_id']] = $hasNoRecursive[$pageId][$result['type']][$result['object_id']];
+                if (is_array($hasNoRecursive[$pageId][$resultItem['type']][$resultItem['object_id']])) {
+                    $this->aclList[$pageId][$resultItem['type']][$resultItem['object_id']] = $hasNoRecursive[$pageId][$resultItem['type']][$resultItem['object_id']];
                 } else {
-                    $this->aclList[$pageId][$result['type']][$result['object_id']] = $aclData;
+                    $this->aclList[$pageId][$resultItem['type']][$resultItem['object_id']] = $aclData;
                 }
             }
 
             // Increment ACL count
-            $this->aclList[$pageId]['meta'][$result['type']]['acls'] += 1;
+            $this->aclList[$pageId]['meta'][$resultItem['type']]['acls'] += 1;
         }
 
         // Find child pages and their ACL permissions
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('pages');
-        $query = $connection->createQueryBuilder();
-        $query->getRestrictions()->removeAll();
-        $query->addSelectLiteral('*')
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll();
+
+        $queryBuilder->select('*')
             ->from('pages')
-            ->where('`pid` =' . intval($pageId) . ' AND `deleted` = 0');
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(false, \PDO::PARAM_BOOL)
+                )
+            );
 
-        $res = $query->execute()->fetchAll();
+        $result = $queryBuilder->execute()->fetchAll();
 
-        if($res[0]){
-            foreach ($res as $result) {
-                $this->traversePageTree_acl($parentACLs, $result['uid']);
+        if(!empty($result)){
+            foreach ($result as $resultItem) {
+                $this->traversePageTree_acl($parentACLs, $resultItem['uid']);
             }
         }
     }

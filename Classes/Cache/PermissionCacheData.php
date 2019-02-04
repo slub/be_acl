@@ -50,7 +50,7 @@ class PermissionCacheData
     public function __construct()
     {
         $this->timestamp = time();
-        $this->permissionClauseCache = array();
+        $this->permissionClauseCache = [];
     }
 
     /**

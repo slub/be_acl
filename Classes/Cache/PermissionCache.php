@@ -56,7 +56,7 @@ class PermissionCache implements SingletonInterface
      *
      * @var array
      */
-    protected $permissionCacheFirstLevel = array();
+    protected $permissionCacheFirstLevel = [];
 
     /**
      * This cache will be used during single requests.
@@ -96,7 +96,7 @@ class PermissionCache implements SingletonInterface
      */
     public function flushCache()
     {
-        $this->permissionCacheFirstLevel = array();
+        $this->permissionCacheFirstLevel = [];
         $this->timestampUtility->updateTimestamp();
     }
 
