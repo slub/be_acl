@@ -3,15 +3,14 @@ if (!defined('TYPO3_MODE')) {
 	die ('Access denied.');
 }
 
-$_EXTCONF = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['be_acl'];
+$_EXTCONF = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('be_acl');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig('
 	options.saveDocNew.tx_beacl_acl=1
 ');
 
-
-$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauthgroup.php']['calcPerms'][] = 'JBartels\\BeAcl\\Utility\\UserAuthGroup->calcPerms';
-$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauthgroup.php']['getPagePermsClause'][] = 'JBartels\\BeAcl\\Utility\\UserAuthGroup->getPagePermsClause';
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauthgroup.php']['calcPerms'][] = 'JBartels\\BeAcl\\Utility\\UserAuthGroup->calcPerms';
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauthgroup.php']['getPagePermsClause'][] = 'JBartels\\BeAcl\\Utility\\UserAuthGroup->getPagePermsClause';
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Beuser\\Controller\\PermissionController'] = array(
 	'className' => 'JBartels\\BeAcl\\Controller\\PermissionController',
@@ -25,7 +24,7 @@ $redisLoaded = extension_loaded('redis') && $_EXTCONF['enableRedis'];
 
 // set tx_be_acl_timestamp-cache
 if (!isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['frontend'])) {
-	$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['frontend'] = 'TYPO3\\CMS\\Core\\Cache\\Frontend\\StringFrontend';
+	$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['frontend'] = 'TYPO3\\CMS\\Core\\Cache\\Frontend\\VariableFrontend';
 }
 if (!isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['backend'])) {
 	if ( $redisLoaded )
