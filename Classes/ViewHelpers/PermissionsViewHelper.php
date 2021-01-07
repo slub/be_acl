@@ -16,6 +16,7 @@ namespace JBartels\BeAcl\ViewHelpers;
 
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
 
 /**
  * Render permission icon group (user / group / others) of the "Access" module.
@@ -33,6 +34,7 @@ class PermissionsViewHelper extends \TYPO3\CMS\Beuser\ViewHelpers\PermissionsVie
      * @param \Closure $renderChildrenClosure
      * @param RenderingContextInterface $renderingContext
      * @return string
+     * @throws Exception
      */
     public static function renderStatic(
         array $arguments,
