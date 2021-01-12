@@ -302,10 +302,7 @@ class UserAuthGroup
 
     protected function getDisableOldPermissionSystem()
     {
-			if ( \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) >= 9000000)
-	        	return (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('be_acl', 'disableOldPermissionSystem');
-	        else
-	        	return (bool)unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['be_acl'])['disableOldPermissionSystem'];
+        return (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('be_acl', 'disableOldPermissionSystem');
 	}
 
 }
