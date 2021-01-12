@@ -14,12 +14,6 @@ return [
 		'default_sortby' => 'ORDER BY type',
 		'iconfile' => 'EXT:be_acl/Resources/Public/Icons/icon_tx_beacl_acl.gif',
 	],
-	'feInterface' => [
-		'fe_admin_fieldList' => 'type, object_id, permissions, recursive',
-	],
-	'interface' => [
-		'showRecordFieldList' => 'type,object_id,permissions,recursive'
-	],
 	'columns' => [
 		'type' => [
 			'exclude' => 1,
