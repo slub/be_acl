@@ -21,8 +21,9 @@
         }
     ],
     "support": {
-        "source": "https://git.p2media.de/p2media/public/typo3/ext-be_acl",
-        "issues": "https://git.p2media.de/p2media/public/typo3/ext-be_acl/-/issues",
+        "source": "https://github.com/p2media/typo3-ext--be-acl",
+        "issues": "https://github.com/p2media/typo3-ext--be-acl/issues",
+        "forum": "https://github.com/p2media/typo3-ext--be-acl/discussions",
         "docs": "https://docs.typo3.org/typo3cms/extensions/be_acl/"
     },
     "require": {
