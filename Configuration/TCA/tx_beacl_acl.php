@@ -27,6 +27,7 @@ return [
 				],
 				'size' => 1,
 				'maxitems' => 1,
+				'default' => 0,
 			]
 		],
 		'object_id' => [
@@ -39,6 +40,7 @@ return [
 				'size' => 1,
 				'minitems' => 0,
 				'maxitems' => 1,
+				'default' => 0,
 			]
 		],
 		'permissions' => [
@@ -60,7 +62,8 @@ return [
 			'exclude' => 1,
 			'label' => 'LLL:EXT:be_acl/Resources/Private/Languages/locallang_db.xlf:tx_beacl_acl.recursive',
 			'config' => [
-				'type' => 'check'
+				'type' => 'check',
+				'default' => 0,
 			]
 		],
 	],
