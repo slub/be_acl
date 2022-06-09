@@ -137,7 +137,6 @@ class UserAuthGroup
      */
     public function getPagePermsClause($params, $that)
     {
-
         /** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
         $permissionCache = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCache');
         $permissionCache->setBackendUser($that);
@@ -162,14 +161,13 @@ class UserAuthGroup
         $this->getPagePermsClause_single(0, $that->user['uid'], $perms);
 
         // get allowed IDs for every single group
-        if ($that->groupList) {
-            $groupList = explode(',', $that->groupList);
-            foreach ($groupList as $singleGroup) {
+        if ($that->userGroupsUID) {
+            foreach ($that->userGroupsUID as $singleGroup) {
                 $this->getPagePermsClause_single(1, $singleGroup, $perms);
             }
         }
-        if (!empty($this->aclPageList)) {
 
+        if (!empty($this->aclPageList)) {
             // put all page IDs together to the final SQL string
             $str = '( ' . $str . ' ) OR ( `pages`.`uid` IN (' . implode(',', $this->aclPageList) . ') )';
 
