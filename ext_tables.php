@@ -1,6 +1,12 @@
 <?php
-if (!defined('TYPO3_MODE')) {
+if (! defined('TYPO3_MODE')) {
 	die ('Access denied.');
 }
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::allowTableOnStandardPages("tx_beacl_acl");
+
+call_user_func(function () {
+
+	\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::allowTableOnStandardPages('tx_beacl_acl');
+
+});
+
