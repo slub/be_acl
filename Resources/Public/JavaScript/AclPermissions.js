@@ -18,17 +18,17 @@
 define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'], function($,Permissions,Notification) {
 
 	var ajaxUrl = TYPO3.settings.ajaxUrls['user_access_permissions'];
-	
+
 	var AclPermissions = {
 		options: {
 			containerSelector: '#PermissionControllerEdit'
 		}
 	};
-	
+
 	var newACLs = new Array();
 	var currentACLs = new Array();
 	var editAclRowTpl;
-	
+
 	AclPermissions.getEditAclRowTpl = function() {
 		if(!editAclRowTpl) {
 			editAclRowTpl = $('#tx_beacl-edit-acl-row-template').html();
@@ -49,14 +49,14 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		hiddenStore.setAttribute('name', name);
 		hiddenFields.appendChild(hiddenStore);
 	}
-	
+
 	/**
 	* create new ACL ID
 	*/
    AclPermissions.getNewId = function() {
 	   return 'NEW' + Math.round(Math.random()*10000000);
    }
-	
+
 	/**
 	* add ACL
 	*/
@@ -66,16 +66,26 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		var ACLid = AclPermissions.getNewId();
 		// save ACL ID in the new ACLs array
 		newACLs.push(ACLid);
-		// Create table row 
+		// Create table row
 		var tableRow = AclPermissions.getEditAclRowTpl().replace(/###uid###/g,ACLid);
 		// append line to table
 		$('#typo3-permissionMatrix tbody').append(tableRow);
+		$('#PermissionControllerEdit').append(AclPermissions.addHiddenInput(ACLid));
 	};
-	
+
+  AclPermissions.addHiddenInput = function (ACLid) {
+    return '<input data-acluid="' + ACLid + '" type="hidden" name="data[tx_beacl_acl][' + ACLid + '][permissions]" value="" data-checkbox-group="data[tx_beacl_acl][' + ACLid + '][permissions]" />';
+  };
+
+  AclPermissions.removeHiddenInput = function (ACLid) {
+    let $hiddenInput = $('#PermissionControllerEdit').find('input[data-acluid="'+ ACLid +'"]');
+    if($hiddenInput.length) $hiddenInput.remove();
+  };
+
 	AclPermissions.removeACL = function(id) {
 		var $tableRow = $('#typo3-permissionMatrix tbody').find('tr[data-acluid="'+ id +'"]');
 		if($tableRow.length) $tableRow.remove();
-	}
+  }
 /**
 	 * Group-related: Set the new group by executing an ajax call
 	 *
@@ -85,12 +95,13 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		var $container = $(AclPermissions.options.containerSelector),
 			pageID = $container.data('pageid'),
 			id = $element.data('acluid');
-		
+
 		// New ACL - simply remove ACL from table
 		if(isNaN(id)) {
 			AclPermissions.removeACL(id);
+      AclPermissions.removeHiddenInput(id);
 			return;
-		} 
+		}
 		// Existing ACL - send delete request
 		$.ajax({
 			url: ajaxUrl,
@@ -105,6 +116,7 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		}).done(function(data) {
 			// Remove from table
 			AclPermissions.removeACL(id);
+      AclPermissions.removeHiddenInput(id);
 			// Show notification
 			var title = data.title || 'Success';
 			var msg = data.message || 'ACL deleted';
@@ -113,7 +125,7 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 			Notification.error(null,error);
 		});
 	};
-	
+
 	/**
 	* update user and group information
 	*
@@ -125,7 +137,7 @@ define(['jquery','TYPO3/CMS/Beuser/Permissions','TYPO3/CMS/Backend/Notification'
 		var $container = $(AclPermissions.options.containerSelector),
 			pageID = $container.data('pageid'),
 			type = (typeVal == 1) ? 'group' : 'user';
-	   
+
 		// get child nodes of user/group selector
 		var $selector = $('select[name=tx_beuser_system_beusertxpermission\\[data\\]\\[pages\\]\\['+pageID+'\\]\\[perms_'+type+'id\\]]');
 

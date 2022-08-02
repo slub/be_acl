@@ -39,6 +39,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Backend ACL - Replacement for "web->Access"
@@ -65,7 +66,24 @@ class PermissionController extends BasePermissionController
      */
     protected function initializeView(string $template = ''): void
     {
-        parent::initializeView($template);
+        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
+        $this->view->setTemplateRootPaths(
+            ['EXT:beuser/Resources/Private/Templates/Permission', 'EXT:be_acl/Resources/Private/Templates/Permission']
+        );
+        $this->view->setPartialRootPaths(
+            ['EXT:beuser/Resources/Private/Partials', 'EXT:be_acl/Resources/Private/Partials']
+        );
+        $this->view->setLayoutRootPaths(
+            ['EXT:beuser/Resources/Private/Layouts', 'EXT:be_acl/Resources/Private/Layouts']
+        );
+
+        if ($template !== '') {
+            $this->view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName('EXT:be_acl/Resources/Private/Templates/Permission/' . $template . '.html')
+            );
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Beuser/Permissions');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        }
 
         if(empty($this->returnUrl)) {
             $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
@@ -96,7 +114,7 @@ class PermissionController extends BasePermissionController
     {
         $response = new HtmlResponse('');
         $parsedBody = $request->getParsedBody();
-        $action = $requestBody['action'] ?? null;
+        $action = $parsedBody['action'] ?? null;
 
         if ($action === 'delete_acl') {
             return $this->deleteAcl($request, $response);
