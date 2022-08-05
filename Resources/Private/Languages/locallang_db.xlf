@@ -18,6 +18,9 @@
       <trans-unit id="tx_beacl_acl.object_id" xml:space="preserve">
         <source>ID of User/Group</source>
       </trans-unit>
+		<trans-unit id="tx_beacl_acl.object_id.select">
+			<source>Select ID of User/Group</source>
+		</trans-unit>
       <trans-unit id="tx_beacl_acl.permissions.I.0" xml:space="preserve">
         <source>Show page</source>
       </trans-unit>

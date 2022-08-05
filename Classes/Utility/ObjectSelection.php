@@ -25,6 +25,7 @@ namespace JBartels\BeAcl\Utility;
  ***************************************************************/
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * Class for building the item array for the Backend forms.
@@ -51,13 +52,15 @@ class ObjectSelection
             return;
         }
 
-        // Resetting the SELECT field items
-        $PA['items'] = array(
-            0 => array(
-                0 => '',
-                1 => '',
-            ),
-        );
+        $PA['items'] = [
+            0 =>[
+                0 => LocalizationUtility::translate(
+                    'LLL:EXT:be_acl/Resources/Private/Languages/locallang_db.xlf:tx_beacl_acl.object_id.select',
+                    'be_acl'
+                ),
+                1 => 0,
+            ],
+        ];
         $type = isset($PA['row']['type'][0]) ? $PA['row']['type'][0] : null;
         // Get users or groups - The function copies functionality of the method acl_objectSelector()
         // of ux_SC_mod_web_perm_index class as for non-admins it returns only:
