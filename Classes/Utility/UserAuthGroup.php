@@ -219,7 +219,9 @@ class UserAuthGroup
                 )
             )
             ->execute();
-//        $aclAllowed[] = $statement->fetchAll();
+
+        $aclAllowed = [];
+
         while ($result = $statement->fetch()) {
             $aclAllowed[] = $result;
         }
