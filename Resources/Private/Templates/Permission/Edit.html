@@ -12,7 +12,6 @@
 <f:section name="content">
     <f:comment><!-- {base} is defined as it's *required* for mathematical operations in Fluid --></f:comment>
     <f:variable name="base" value="2" />
-
     <form action="{formAction}" method="post" name="editform" id="PermissionControllerEdit">
 
         <div class="row row-cols-auto align-items-end g-3">
@@ -60,6 +59,8 @@
                         <th><f:translate key="LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:2" /></th>
                         <th><f:translate key="LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:4" /></th>
                         <th><f:translate key="LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:8" /></th>
+                        <th><f:translate key="LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:recursive" /></th>
+                        <th><f:format.case mode="capital"><f:translate key="LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:deleted" /></f:format.case></th>
                     </tr>
                     </thead>
                     <tbody>
